@@ -11,3 +11,4 @@ ANTSPATH=/Users/brianavants/code/bin/ants/
 btp_params=" -c 2 -j 8 -i 2  " 
 # these parameters are updated to do a (mostly) affine space template and use serial registrations
 btp_params=" -c 0  -i 2 -m 1 " 
+btp_params_group=" -n 0 -c 2 -j 8 "
