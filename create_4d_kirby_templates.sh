@@ -27,7 +27,7 @@ cd ${datahome}
 
 # create a list of subjects takes into account all directory names, so don't make custom dirs in datahome
 # subjects=`ls -d */ | xargs -l basename` # did not work for me -- the -l option , not sure why
- subjects=`ls -d */ | xargs  basename`
+ subjects=`find * -prune -type d`
 
 for currentsubject in ${subjects}
 do

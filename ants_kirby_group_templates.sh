@@ -27,7 +27,7 @@ control_c()
 cd ${datahome}
 
 # create a list of subjects takes into account all directory names, so don't make custom dirs in datahome
-subjects=`ls -d */ | xargs basename`
+subjects=`find * -prune -type d`
 
 mkdir ${datahome}/session_01_GrpBoldTemplate
 mkdir ${datahome}/session_02_GrpBoldTemplate
