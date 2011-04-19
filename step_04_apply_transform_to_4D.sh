@@ -52,6 +52,10 @@ echo "--------------------------------------------------------------------------
 
 ${ANTSPATH}WarpTimeSeriesImageMultiTransform 4 ${datahome}/${currentsubject}/session_01/nifti/fMRI/KKI2009*.nii.gz ${datahome}/${currentsubject}/session_01/nifti/fMRI/${currentsubject}_session_01_2SST.nii.gz -R ${datahome}/session_01_GrpBoldTemplate/session_01_template.nii.gz ${datahome}/session_01_GrpBoldTemplate/*${currentsubject}templateWarp.nii.gz ${datahome}/session_01_GrpBoldTemplate/*${currentsubject}templateAffine.txt
 
+if [ -s ${datahome}/session_01_GrpBoldTemplate/session_01_group_template_rsfmri_mask.nii.gz ] ; then
+${ANTSPATH}ImageMath 4 ${datahome}/${currentsubject}/session_01/nifti/fMRI/${currentsubject}_session_01_2SST.nii.gz CompCorr ${datahome}/${currentsubject}/session_01/nifti/fMRI/${currentsubject}_session_01_2SST.nii.gz  ${datahome}/session_01_GrpBoldTemplate/session_01_group_template_rsfmri_mask.nii.gz
+fi 
+
 echo
 echo "--------------------------------------------------------------------------------------"
 echo " Transformed data saved as: "
@@ -64,6 +68,10 @@ echo " Session 2, Subject: ${currentsubject}"
 echo "--------------------------------------------------------------------------------------"
 
 WarpTimeSeriesImageMultiTransform 4 ${datahome}/${currentsubject}/session_02/nifti/fMRI/KKI2009*.nii.gz ${datahome}/${currentsubject}/session_02/nifti/fMRI/${currentsubject}_session_02_2SST.nii.gz -R ${datahome}/session_02_GrpBoldTemplate/session_02_template.nii.gz ${datahome}/session_02_GrpBoldTemplate/*${currentsubject}templateWarp.nii.gz ${datahome}/session_02_GrpBoldTemplate/*${currentsubject}templateAffine.txt
+
+if [ -s ${datahome}/session_02_GrpBoldTemplate/session_02_group_template_rsfmri_mask.nii.gz  ] ; then
+${ANTSPATH}ImageMath 4 ${datahome}/${currentsubject}/session_02/nifti/fMRI/${currentsubject}_session_02_2SST.nii.gz CompCorr ${datahome}/${currentsubject}/session_02/nifti/fMRI/${currentsubject}_session_02_2SST.nii.gz  ${datahome}/session_02_GrpBoldTemplate/session_02_group_template_rsfmri_mask.nii.gz
+fi
 
 echo
 echo "--------------------------------------------------------------------------------------"
