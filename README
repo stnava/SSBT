@@ -1,0 +1,7 @@
+# first set up dependencies then 
+# reorganize data
+# ./pipelines/step_01_organize_data.sh ./pipelines/dependencies.sh
+framework=ants
+# get templates 
+ ./pipelines/${framework}/step_02_create_4D_templates.sh ./pipelines/dependencies.sh 
+
