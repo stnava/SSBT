@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/env Rscript
 Args <- commandArgs()
 #
 if ( length(Args) < 9  ){
