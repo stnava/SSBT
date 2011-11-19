@@ -24,21 +24,31 @@ control_c()
 function unpackKirkbyData
 {
 	dataset=${1}
-	bzip2 -t -d ${dataset}.tar.bz2 
-	tar -xvf ${dataset}.tar
-	rm -f *.par *.tar
-	mkdir MPRAGE FLAIR SURVEY T2w DTI fMRI B08MS B09MS B1MAP ASL ASLM0 VASO MT qT115 qT160 DET2
-	for seqname in MPRAGE FLAIR SURVEY T2w DTI fMRI B08MS B09MS B1MAP ASL ASLM0 VASO MT qT115 qT160 DET2; do
-	gzip     *${seqname}.*
-	mvtarget=`ls *${seqname}.*`
-	mv ${mvtarget} ${seqname}/
-	done
-#	handle exception	
-	if [ -f *MPRAGE_float.nii.gz ]
-	then
-	mv *MPRAGE_float.nii.gz MPRAGE/
+	extract_all=0
+        if [ $extract_all == 0 ] ; then 
+          seqname=fMRI
+	  mkdir $seqname
+          tar xvjf  ${dataset}.tar.bz2 ${dataset}-fMRI.nii
+	  gzip     ${dataset}-fMRI.nii
+	  mv ${dataset}-fMRI.nii.gz ${seqname}/
+        fi 
+        if [ $extract_all == 1 ] ; then 
+	  bzip2 -t -d ${dataset}.tar.bz2 
+	  tar -vjf  --extract --file=${dataset}.tar.bz2  fMRI
+	  rm -f *.par *.tar
+	  mkdir MPRAGE FLAIR SURVEY T2w DTI fMRI B08MS B09MS B1MAP ASL ASLM0 VASO MT qT115 qT160 DET2
+	  for seqname in MPRAGE FLAIR SURVEY T2w DTI fMRI B08MS B09MS B1MAP ASL ASLM0 VASO MT qT115 qT160 DET2; do
+	    gzip     *${seqname}.*
+	    mvtarget=`ls *${seqname}.*`
+	    mv ${mvtarget} ${seqname}/
+	  done
+          #	handle exception	
+	  if [ -f *MPRAGE_float.nii.gz ]
+	  then
+	    mv *MPRAGE_float.nii.gz MPRAGE/
+	  fi
 	fi
-
+	
 }
 
 # These three arrays contain the information about which subjects ID's are related to which session numbers. S1 holds the first session, s2 the second.
