@@ -1,9 +1,10 @@
 #!/bin/bash
-# set this dir to the path where the data is stored (bzip files) and where it will be sorted and unpacked.
-# datahome=/media/data/niels/experiments/kirkby/data/data_orig
-# resultshome=/media/data/niels/experiments/kirkby/results
-datahome=/Users/stnava/data/kirby/data_raw
+# set this dir to the path where the input (e.g. test_data) data is stored (bzip files)
+datahome=/Users/stnava/data/kirby/test_data
+#  set this dir to the location of the 4D single subject and group template & other results 
 resultshome=/Users/stnava/data/kirby/data_organized
+#  set this dir to the ants output within the resultshome directory
+pipelinedir=ants_ssbt
 
 # path to ANTs binaries 
 #ANTSPATH=/Users/brianavants/code/bin/ants/
@@ -14,6 +15,8 @@ resultshome=/Users/stnava/data/kirby/data_organized
 # these parameters are from niels original script --- uses defaults for -m options
 btp_params=" -c 0 -j 1 -i 2 -m 100x50 " 
 
-# these parameters are updated to do a (mostly) affine space template and use serial registrations
-#btp_params=" -c 0  -i 2 -m 1 " 
-#btp_params_group=" -n 0 -c 2 -j 8 "
+# parameters for testing 
+btp_params=" -c 0 -j 1 -i 1 -m 10x1 " 
+
+# parameters for testing group template creation 
+btp_params_group=" -c 0 -j 1 -i 2 -m 30x5x1 " 

@@ -1,7 +1,47 @@
-# first set up dependencies then 
-# reorganize data
+#
+# first set up dependencies then reorganize data into 
+# dataset/subjectID/timepoint/modality/subjectID_timepoint_modality.nii.gz
+#
+# subjectID should only have numeric or alphabetic characters or underscore
+# and should never include characters such as @ ! # space etc
+#
+# in this example case based on kirby data , we do this for you in the step00 script
+#
 # ./pipelines/step_01_organize_data.sh ./pipelines/dependencies.sh
+#
+# now use the ants framework to build single subject and group templates 
 framework=ants
-# get templates 
- ./pipelines/${framework}/step_02_create_4D_templates.sh ./pipelines/dependencies.sh 
-
+# 
+#  Define a csv file for each subject of size N-Time-Points by regressors
+# 
+#  FrameIsGood,GrandMean,CompCorrEvec1...N,SNRperFrame,ContrastToNoiseperFrame,TimeValueInSec
+#
+# TimeValueInSec - NA unless otherwise specified 
+#
+# ADD MOTION CORRECTION BASED QC (annotate bad frames) AND OPTIONAL BRAIN EXTRACTION???
+#
+# get subject specific templates 
+# ./pipelines/${framework}/step_02_create_4D_templates.sh ./pipelines/dependencies.sh 
+# build group templates
+# ./pipelines/${framework}/step_03_create_group_templates.sh ./pipelines/dependencies.sh 
+# map 4D data to template space 
+ ./pipelines/${framework}/step_04_apply_transform_to_4D.sh ./pipelines/dependencies.sh
+# here, preprocessing is done
+# now enter the statistics part of the script
+# 
+# get the gray matter mask , the ROI of interest and then compute CompCorr , then evaluate test-retest and visualize results
+# 
+# 5.1 - segment cortex, 
+# 5.2 - label ROI in cortex ,
+# 5.3 - CompCorr (physio noise) 
+#     5.3.1 - compute the time series variance at each voxel in the brain 
+#     5.3.2 - build a histogram of the 5.3.1 variance over the brain   
+#     5.3.3 - take the high variance (>95%) voxels and put them in the nuisance matrix
+#     5.3.4 - do PCA on the nuisance matrix & factor out the top N eigenvectors from the original time series data 
+#     Note : we also subtract the grand mean in this implementation --- maybe the grand mean (and compcorr output) should be written out as a csv file that could be used as covariates   
+#     Note2 : temporal smoothing is implemented here for now but should be elsewhere 
+# 5.4 - Preprocessing e.g. spatial and temporal smoothing (define parameters in dependencies.sh)
+# 5.5 - Level1 stats e.g. resting state correlations (via R)
+# 5.6 - Level2 stats e.g. group consistency of resting state correlations (via R)
+# 5.7 - evaluation 
+# 

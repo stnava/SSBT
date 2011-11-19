@@ -64,10 +64,11 @@ time_start=`date +%s`
 cd ${datahome}
 # setting up 21 folders with 2 sessions each; source data will be stored in nifti dir
 j=0
-for ((i = 1; i < 22 ; i++))
+nsub=${#id[@]}
+for ((i = 1; i <= $nsub ; i++))
 do
 	echo
-	echo "Subject ${i} of 21. ID = ${id[${j}]}"
+	echo "Subject ${i} of $nsub. ID = ${id[${j}]}"
 	if [[ -s "KKI2009-${s1[${j}]}".tar.bz2  ]] &&  [[ -s "KKI2009-${s2[${j}]}".tar.bz2  ]] ; then 
 	mkdir ${id[${j}]}
  	mkdir ${id[${j}]}/session_01
@@ -80,11 +81,11 @@ do
 	cp "KKI2009-${s2[${j}]}".tar.bz2 ${id[${j}]}/session_02/nifti
 	cd ${id[${j}]}/session_01/nifti
 	echo
-	echo "Subject ${i} of 21. ID = ${id[${j}]} session 1"
+	echo "Subject ${i} of $nsub. ID = ${id[${j}]} session 1"
 	unpackKirkbyData "KKI2009-${s1[${j}]}"
 	cd ../../session_02/nifti
 	echo
-	echo "Subject ${i} of 21. ID = ${id[${j}]} session 2"
+	echo "Subject ${i} of $nsub. ID = ${id[${j}]} session 2"
 	unpackKirkbyData "KKI2009-${s2[${j}]}"
 	fi # check if data exists
 	cd ${datahome}
