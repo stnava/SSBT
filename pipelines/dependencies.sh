@@ -6,6 +6,8 @@ resultshome=/Users/stnava/data/kirby/data_organized
 #  set this dir to the ants output within the resultshome directory
 pipelinedir=ants_ssbt
 
+# path to sccan code ---  move to ants ?
+SCCAN=~/code/sccan/bin/sccan
 # path to ANTs binaries 
 #ANTSPATH=/Users/brianavants/code/bin/ants/
 

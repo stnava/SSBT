@@ -12,9 +12,13 @@
 # now use the ants framework to build single subject and group templates 
 framework=ants
 # 
+#  Should check subject leverage i.e. not select bad subjects! 
+#
 #  Define a csv file for each subject of size N-Time-Points by regressors
 # 
-#  FrameIsGood,GrandMean,CompCorrEvec1...N,SNRperFrame,ContrastToNoiseperFrame,TimeValueInSec
+#  FrameIsGood,GrandMean,CompCorrEvec1...N,SNRperFrame,ContrastToNoiseperFrame,TimeValueInSec,MotionParametersFrameToFrame,MotionParametersFrameToReference 
+#   ENH: update 11/20 have GrandMean,CompCorrEvec1...N from output of ImageMath CompCorrAuto 
+#   ENH: update 11/20 have spatial and temporal smoothing in sccan 
 #
 # TimeValueInSec - NA unless otherwise specified 
 #
@@ -31,17 +35,20 @@ framework=ants
 # 
 # get the gray matter mask , the ROI of interest and then compute CompCorr , then evaluate test-retest and visualize results
 # 
-# 5.1 - segment cortex, 
-# 5.2 - label ROI in cortex ,
-# 5.3 - CompCorr (physio noise) 
+# 5.1 - segment cortex --- done 11/20 in ImageMath
+# 5.2 - label ROI in cortex  --- done 11/20
+# 5.3 - CompCorr (physio noise)  --- done 11/20
 #     5.3.1 - compute the time series variance at each voxel in the brain 
 #     5.3.2 - build a histogram of the 5.3.1 variance over the brain   
 #     5.3.3 - take the high variance (>95%) voxels and put them in the nuisance matrix
 #     5.3.4 - do PCA on the nuisance matrix & factor out the top N eigenvectors from the original time series data 
 #     Note : we also subtract the grand mean in this implementation --- maybe the grand mean (and compcorr output) should be written out as a csv file that could be used as covariates   
 #     Note2 : temporal smoothing is implemented here for now but should be elsewhere 
-# 5.4 - Preprocessing e.g. spatial and temporal smoothing (define parameters in dependencies.sh)
-# 5.5 - Level1 stats e.g. resting state correlations (via R)
-# 5.6 - Level2 stats e.g. group consistency of resting state correlations (via R)
+# 5.4 - Preprocessing e.g. spatial and temporal smoothing (define parameters in dependencies.sh)  --- done 11/20 in sccan
+# 5.5 - Level1 stats e.g. resting state correlations (via R) --- done 11/20 in statistics directory for rsf network see Rscript ~/data/kirby/statistics/antsr_resting_state_corr.R  ~/code/sccan/bin/sccan ${ID}cortmask.nii.gz $ID
+
+# 5.6 - Level2 stats e.g. group consistency of resting state correlations (via R) --- done 11/20 via t-test 
 # 5.7 - evaluation 
 # 
+# call this to get the compcorr outputs , the segmentations and brain masks .... you'd need roimasks to get the rsf networks  
+./pipelines/${framework}/step_05_brainmask_and_compcorr.sh ../dependencies.sh
