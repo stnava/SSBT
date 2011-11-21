@@ -59,13 +59,14 @@ if [[ -s ${ID}cortmask.nii.gz ]] && [[ -s ${ID}out_corrected.nii.gz ]] ; then
   if [[ -s roimask.nii.gz ]] ; then 
     ImageMath 4 ${ID}_roi.nii.gz CompCorrAuto $SST roimask.nii.gz 1
     rm ${ID}_roi_corrected.nii.gz ${ID}_roi_variance.nii.gz
+    Rscript ${datahome}/../statistics/antsr_resting_state_corr.R  $SCCAN ${ID}cortmask.nii.gz $ID
   fi 
 # you could also use svd 
-  $SCCAN --sparse-svd [${ID}.csv,${ID}cortmask.nii.gz,-0.5] -n 5 -i 30 --PClusterThresh 50  -o ${ID}RSF_Networks.nii.gz 
+  $SCCAN --sparse-svd [${ID}.csv,${ID}cortmask.nii.gz,0.5] -n 20 -i 40 --PClusterThresh 50  -o ${ID}RSF_Networks.nii.gz 
+  Rscript  ${datahome}/../statistics/antsr_resting_state_corr_eigenanat.R ${ID}RSF_NetworksprojectionsView1vec.csv  ${ID}out_compcorr.csv ${ID}_ea_rsf
 fi 
 
 }
-
 
 # begin main functionality 
 #

@@ -29,7 +29,7 @@ framework=ants
 # build group templates
 # ./pipelines/${framework}/step_03_create_group_templates.sh ./pipelines/dependencies.sh 
 # map 4D data to template space 
- ./pipelines/${framework}/step_04_apply_transform_to_4D.sh ./pipelines/dependencies.sh
+# ./pipelines/${framework}/step_04_apply_transform_to_4D.sh ./pipelines/dependencies.sh
 # here, preprocessing is done
 # now enter the statistics part of the script
 # 
@@ -51,4 +51,5 @@ framework=ants
 # 5.7 - evaluation 
 # 
 # call this to get the compcorr outputs , the segmentations and brain masks .... you'd need roimasks to get the rsf networks  
-./pipelines/${framework}/step_05_brainmask_and_compcorr.sh ../dependencies.sh
+
+./pipelines/${framework}/step_05_brainmask_and_compcorr.sh ./pipelines/dependencies.sh
