@@ -35,15 +35,29 @@ ARGIND<-ARGIND+1
      vals2<-evecs[,y]
 #  pvalue of relationship with the ROI 
      modelresults<-(summary(lm(statform)))
-     print(paste("x",x,"y",y,"pval",modelresults$coeff[2,4]))
+#     print(paste("x",x,"y",y,"pval",modelresults$coeff[2,4]))
      pvals[x,y]<-modelresults$coeff[2,4]
      betav[x,y]<-modelresults$coeff[2,3]
      }
    }
  }
  print("done stats")
- qv<-p.adjust(pvals)
- print(qv)
+ qv<-matrix(p.adjust(pvals),nrow=nvox,ncol=nvox)
+ for ( x in c(1:nvox) ) 
+ { 
+   ntw<-c("")
+   ntwq<-c("")
+   for ( y in c(1:nvox) ) 
+   { 
+     if ( x != y & qv[x,y] < 0.001 )
+     {
+       ntw<-paste(ntw,y-1)
+       ntwq<-paste(ntwq, qv[x,y] )
+     }
+   }
+   print(paste("Network_for_variate_",x-1,"includes variates:",ntw))
+#   print(paste("Network_for_variate_",x-1,"qvals:",ntwq))
+ }
  betav<-betav*(qv <= 0.05) 
  dfm<-data.frame(betas=betav,qvals=1-qv,pvals=1-pvals)
  write.csv(dfm,paste(id,'qvals.csv',sep=''),row.names = F,q=T)

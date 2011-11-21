@@ -1,0 +1,17 @@
+#! /bin/bash
+FIX=$1
+MOV=$2
+if [[ -s $FIX ]]  & [[ -s $MOV ]] & [[ ${#FIX} -gt 3 ]]  & [[ ${#MOV} -gt 3 ]]  ; then 
+exe="ants_moco -d 3 -o [ MOCO ] \
+                        -m MI[ $FIX ,  $MOV , 1, 32, 20 ] \
+                         -t Rigid[0.01]  \
+                         -i 50x50  \
+                        -s 1x0  \
+                        -f 1x1 "
+
+echo $exe
+
+$exe
+else 
+echo usage :  $0 fixed_3d_image moving_time_series_image 
+fi 

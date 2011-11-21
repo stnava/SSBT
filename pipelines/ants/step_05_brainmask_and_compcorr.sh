@@ -23,7 +23,7 @@ control_c()
   echo -en "\n*** Script cancelled by user ***\n"
 }
 
-function persubjectscompcorr {
+function persubjectscompcorrandstats {
 usage=" $0  subject_id session "
 if [[ ${#1} -lt 1 ]] || [[ ${#2} -lt 1 ]] ; then 
  echo usage 
@@ -62,7 +62,7 @@ if [[ -s ${ID}cortmask.nii.gz ]] && [[ -s ${ID}out_corrected.nii.gz ]] ; then
     Rscript ${datahome}/../statistics/antsr_resting_state_corr.R  $SCCAN ${ID}cortmask.nii.gz $ID
   fi 
 # you could also use svd 
-  $SCCAN --sparse-svd [${ID}.csv,${ID}cortmask.nii.gz,0.5] -n 20 -i 40 --PClusterThresh 50  -o ${ID}RSF_Networks.nii.gz 
+  $SCCAN --sparse-svd [${ID}.csv,${ID}cortmask.nii.gz,-0.1] -n 20 -i 40 --PClusterThresh 50  -o ${ID}RSF_Networks.nii.gz 
   Rscript  ${datahome}/../statistics/antsr_resting_state_corr_eigenanat.R ${ID}RSF_NetworksprojectionsView1vec.csv  ${ID}out_compcorr.csv ${ID}_ea_rsf
 fi 
 
@@ -73,10 +73,11 @@ fi
 cd ${datahome}
 # create a list of subjects takes into account all directory names, so don't make custom dirs in datahome
 subjects=`find * -prune -type d`
-for sess in session_01 session_02 ; do 
-  for sub in $subjects ; do 
+for sub in $subjects ; do 
+  for sess in session_01 session_02 ; do 
     cd ${datahome}
     cd ${datahome}/$sub/$sess/nifti/fMRI/
-    persubjectscompcorr $1 $sub $sess
+    persubjectscompcorrandstats $1 $sub $sess
   done 
+  exit
 done
