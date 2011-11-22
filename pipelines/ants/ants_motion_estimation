@@ -1,13 +1,17 @@
 #! /bin/bash
 FIX=$1
 MOV=$2
+OUT=` echo $MOV | cut -d '.' -f 1 `
 if [[ -s $FIX ]]  & [[ -s $MOV ]] & [[ ${#FIX} -gt 3 ]]  & [[ ${#MOV} -gt 3 ]]  ; then 
-exe="ants_moco -d 3 -o [ MOCO ] \
-                        -m MI[ $FIX ,  $MOV , 1, 32, 20 ] \
-                         -t Rigid[0.01]  \
-                         -i 50x50  \
-                        -s 1x0  \
-                        -f 1x1 "
+exe="ants_moco -d 3 -o [ ${OUT}MOCO , ${OUT}MOCO.nii.gz ] \
+                        -t Rigid[1.e-1]  \
+                         -i 25  \
+                        -u 1  \
+                        -e 1  \
+                        -s 0  \
+                        -f 1 \
+                        -m MI[ $FIX ,  $MOV , 1, 16, 100 ] "
+#                        -m Demons[ $FIX ,  $MOV , 1, 2] "
 
 echo $exe
 
