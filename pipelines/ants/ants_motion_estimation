@@ -10,14 +10,15 @@ if [[ ${#usefixed} -lt 1 ]] ; then
 fi 
 OUT=` echo $MOV | cut -d '.' -f 1 `
 if [[ -s $FIX ]]  & [[ -s $MOV ]] & [[ ${#FIX} -gt 3 ]]  & [[ ${#MOV} -gt 3 ]]  ; then 
-exe="ants_moco -d 3 -o [ ${OUT}MOCO , ${OUT}MOCO.nii.gz ] \
+exe="ants_moco -d 3 -o [ ${OUT}MOCO , ${OUT}MOCO.nii.gz , ${OUT}Avg.nii.gz ] \
                         -t Rigid[1.e-1]  \
-                         -i 25  \
+                         -i 10x5  \
                         -u $usefixed  \
                         -e 1  \
-                        -s 0  \
-                        -f 1 \
+                        -s 1x0  \
+                        -f 1x1 \
                         -m MI[ $FIX ,  $MOV , 1, 16, 100 ] "
+#                        -m MI[ $FIX ,  $MOV , 1, 32, 1 ] "
 #                        -m Demons[ $FIX ,  $MOV , 1, 2] "
 
 echo $exe
