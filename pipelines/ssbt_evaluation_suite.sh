@@ -669,8 +669,8 @@ steps may be skipped.
 2. Brain Extract time-series
 3. Compcorr and segment the subject 
 4. Create Group templates per session
-5. Apply step 4 transformation to time-series data
-6. Demo Statistics
+5. Apply group template map to single subject time series 
+6. Perform example statistics 
 7. Back to Main Menu
 
 -------------------------------------------------------------
@@ -685,7 +685,6 @@ case $choice in
 2) ants_brain_extract  ;;
 3) ants_segment_and_compcorr  ;;
 4) ants_4D_template_btp ${framework} ;;
-5) ants_SSBT ${framework} ;;
 6) ants_SSBT_transform ${framework} ;;
 7) ants_ANTSR_stats ${framework} ;;
 8) main_menu ;;
