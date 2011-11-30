@@ -1,0 +1,20 @@
+#! /bin/bash
+img=$1
+usage=" $0 averageimage " 
+if [[ ${#img} -lt 1 ]] ; then 
+  echo " please set a valid input image - you set $img "
+  echo $usage 
+  exit 1
+fi 
+OUT=` echo $img | cut -d '.' -f 1 `
+if [[ -s $img ]] & [[ ${#img} -gt 3 ]]  ; then 
+  BM=${OUT}_brainmask.nii.gz
+  ThresholdImage 3 $img $BM Otsu 3
+  ThresholdImage 3 $BM $BM 2 3 
+  ImageMath 3 $BM ME $BM 1 
+  ImageMath 3 $BM GetLargestComponent $BM 
+  ImageMath 3 $BM MD $BM  2
+  ImageMath 3 $BM ME $BM  1
+else 
+echo $usage
+fi 

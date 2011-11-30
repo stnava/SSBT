@@ -1,13 +1,14 @@
 #!/bin/bash
 # set this dir to the path where the input (e.g. test_data) data is stored (bzip files)
-datahome=/Users/stnava/data/kirby/test_data
+analysishome=/Users/stnava/data/kirby/
+datahome=${analysishome}test_data
 #  set this dir to the location of the 4D single subject and group template & other results 
 resultshome=/Users/stnava/data/kirby/data_organized
 #  set this dir to the ants output within the resultshome directory
 pipelinedir=ants_ssbt
 
 # path to sccan code ---  move to ants ?
-SCCAN=~/code/sccan/bin/sccan
+SCCAN=${ANTSPATH}sccan
 # path to ANTs binaries 
 #ANTSPATH=/Users/brianavants/code/bin/ants/
 

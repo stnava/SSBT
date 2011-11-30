@@ -1,29 +1,29 @@
 #! /bin/bash
-FIX=$1
-MOV=$2
-usefixed=$3
-usage=" $0 fixed3d movingtimeseriesimage reference_image_choice " 
-if [[ ${#usefixed} -lt 1 ]] ; then 
-  echo " do you want to use a fixed reference image \(option 1\) or map time_i+1 to time_i \(option 0\) ?"
+img=$1
+usage=" $0 timeseriesimage " 
+if [[ ${#img} -lt 1 ]] ; then 
+  echo " please set a valid input image - you set $img "
   echo $usage 
   exit 1
 fi 
-OUT=` echo $MOV | cut -d '.' -f 1 `
-if [[ -s $FIX ]]  & [[ -s $MOV ]] & [[ ${#FIX} -gt 3 ]]  & [[ ${#MOV} -gt 3 ]]  ; then 
-exe="ants_moco -d 3 -o [ ${OUT}MOCO , ${OUT}MOCO.nii.gz , ${OUT}Avg.nii.gz ] \
-                        -t Rigid[1.e-1]  \
-                         -i 10x5  \
-                        -u $usefixed  \
-                        -e 1  \
-                        -s 1x0  \
-                        -f 1x1 \
-                        -m MI[ $FIX ,  $MOV , 1, 16, 100 ] "
-#                        -m MI[ $FIX ,  $MOV , 1, 32, 1 ] "
-#                        -m Demons[ $FIX ,  $MOV , 1, 2] "
-
-echo $exe
-
-$exe
+OUT=` echo $img | cut -d '.' -f 1 `
+if [[ -s $img ]] & [[ ${#img} -gt 3 ]]  ; then 
+  avg=${OUT}_avg.nii.gz
+  ants_moco -d 3 -a $img -o $avg 
+  exe="ants_moco -d 3 -o [ ${OUT} , ${OUT}moco.nii.gz , $avg ]                        
+                 -m MI[ $avg , $img , 1, 20, 50 ]                          
+                 -t Rigid[0.01]  
+                 -i 25  -u 1  -e 1  -s 0  -f 1  -n 10 "
+  $exe
+# non rigid template based on 4 images  
+  exe="ants_moco -d 3 -o [ ${OUT} , ${OUT}moco.nii.gz , $avg]                         
+                 -m MI[ $avg , $img , 1, 20, 50 ]                          
+                 -t Rigid[0.01]  
+                 -i 25  -u 1  -e 1  -s 0  -f 1  -n 10 
+                 -m CC[ $fix ,  $MOV , 1, 2 ]                          
+                 -t GaussianDisplacementField[0.15 , 3, 0.5 ]   
+                 -i 10  -u 1  -e 1  -s 0  -f 1 -n 10 "
+  $exe
 else 
-echo usage :  $0 fixed_3d_image moving_time_series_image 
+echo $usage
 fi 

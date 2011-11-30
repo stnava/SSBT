@@ -234,13 +234,106 @@ echo "placeholder for stats options"
 
 ants_motion_correct () {
 clear
-echo "applying motion correction"
+myprocessstep=" motion correction "
+pipelinedir=${framework}
+cd ${resultshome}/${pipelinedir}/
+for currentsubject in ${subjects} ; do
+  cd ${datahome}/${currentsubject}/
+  sessions=` ls ` 
+  echo $sessions
+  for ses in $sessions ; do 
+  echo
+  echo "--------------------------------------------------------------------------------------"
+  echo " Preparing $myprocessstep for subjects: ${currentsubject}, session ${ses}"
+  echo "--------------------------------------------------------------------------------------"
+  ext=fMRI.nii.gz
+  img=` ls ${datahome}/${currentsubject}/${ses}/nifti/fMRI/*${ext} `
+  echo $img 
+  if [[ -s $img ]] ; then
+    echo motion correcting $img with ${pipelinedir}  
+    outdir=${resultshome}/${pipelinedir}/${currentsubject}/${ses}/moco/
+    mkdir -p $outdir
+    cp $img $outdir
+    img=` ls $outdir/*${ext} `
+    ${analysishome}/pipelines/${pipelinedir}/ants_motion_estimation $img 
+    # desired outputs should be in the outdir 
+    rm $img 
+    echo job is completed at $outdir 
+  fi
+  done
+done
 }
 
 ants_brain_extract () {
 clear
-echo "applying brain extraction"
+myprocessstep=" brain extraction "
+pipelinedir=${framework}
+cd ${resultshome}/${pipelinedir}/
+for currentsubject in ${subjects} ; do
+  cd ${datahome}/${currentsubject}/
+  sessions=` ls ` 
+  echo $sessions
+  for ses in $sessions ; do 
+  echo
+  echo "--------------------------------------------------------------------------------------"
+  echo " Preparing $myprocessstep for subjects: ${currentsubject}, session ${ses}"
+  echo "--------------------------------------------------------------------------------------"
+  ext=avg.nii.gz
+  img=` ls ${resultshome}/${pipelinedir}/${currentsubject}/${ses}/moco/*${ext} `
+  echo $img 
+  if [[ -s $img ]] ; then
+    echo extract brain from $img with ${pipelinedir}  
+    outdir=${resultshome}/${pipelinedir}/${currentsubject}/${ses}/brainextraction/
+    mkdir -p $outdir
+    cp $img $outdir
+    img=` ls $outdir/*${ext} `
+    ${analysishome}/pipelines/${pipelinedir}/ants_brain_extraction $img 
+    rm $img 
+    echo job is completed at $outdir 
+  fi
+  done
+done
 }
+
+ants_segment_and_compcorr () {
+clear
+myprocessstep=" ants_segment_and_compcorr "
+pipelinedir=${framework}
+cd ${resultshome}/${pipelinedir}/
+for currentsubject in ${subjects} ; do
+  cd ${datahome}/${currentsubject}/
+  sessions=` ls ` 
+  echo $sessions
+  for ses in $sessions ; do 
+  echo
+  echo "--------------------------------------------------------------------------------------"
+  echo " Preparing $myprocessstep for subjects: ${currentsubject}, session ${ses}"
+  echo "--------------------------------------------------------------------------------------"
+  ext1=moco.nii.gz
+  img1=` ls ${resultshome}/${pipelinedir}/${currentsubject}/${ses}/moco/*${ext1} `
+  ext2=brainmask.nii.gz
+  img2=` ls ${resultshome}/${pipelinedir}/${currentsubject}/${ses}/brainextraction/*${ext2} `
+  ext3=avg.nii.gz
+  img3=` ls ${resultshome}/${pipelinedir}/${currentsubject}/${ses}/moco/*${ext3} `
+  echo require inputs  $img1 $img2 $img3 
+  if [[ -s $img1 ]] && [[ -s $img2 ]] && [[ -s $img3 ]] ; then
+    outdir=${resultshome}/${pipelinedir}/${currentsubject}/${ses}/compcorr/
+    mkdir -p $outdir
+    cp $img1 $outdir
+    cp $img2 $outdir
+    cp $img3 $outdir
+    img1=` ls $outdir/*${ext1} `
+    img2=` ls $outdir/*${ext2} `
+    img3=` ls $outdir/*${ext3} `
+    ${analysishome}/pipelines/${pipelinedir}/ants_compcorr $img1 $img2 $img3
+exit
+    rm $img1 $img2 $img3 
+    echo job is completed at $outdir 
+  fi
+  done
+done
+}
+
 
 ants_4D_template_moco () {
 clear
@@ -572,9 +665,9 @@ This is the ANTS image procssing framework. The steps below
 should all be performed in the indicated order. Some optional 
 steps may be skipped.
 
-1. Motion Correct time-series (optional)
-2. Brain Extract time-series (optional)
-3. Create template from time-series per session
+1. Motion Correct time-series and create subject-specific template 
+2. Brain Extract time-series
+3. Compcorr and segment the subject 
 4. Create Group templates per session
 5. Apply step 4 transformation to time-series data
 6. Demo Statistics
@@ -587,15 +680,15 @@ MENU
 
 echo -n " Your choice? : "
 read choice
-
 case $choice in
 1) ants_motion_correct ;;
 2) ants_brain_extract  ;;
-3) ants_4D_template_btp ${framework} ;;
-4) ants_SSBT ${framework} ;;
-5) ants_SSBT_transform ${framework} ;;
-6) ants_ANTSR_stats ${framework} ;;
-7) main_menu ;;
+3) ants_segment_and_compcorr  ;;
+4) ants_4D_template_btp ${framework} ;;
+5) ants_SSBT ${framework} ;;
+6) ants_SSBT_transform ${framework} ;;
+7) ants_ANTSR_stats ${framework} ;;
+8) main_menu ;;
 *) echo "\"$choice\" is not valid "; sleep 2 ;;
 esac
 done
@@ -689,7 +782,13 @@ done
 # Script starts running below this point
 #############################################################
 source $1
-
+for progs in ANTS sccan ImageMath ; do 
+antsprog=` which $progs `
+if [[ ${#antsprog} -lt 4 ]] || [[ ! -s $antsprog ]] ; then 
+  echo you do not have $progs -- please add the path to the ANTS binaries to your environment / path 
+#  exit
+fi
+done
 # create a list of subjects takes into account all directory names, so don't make custom dirs in datahome
 if [ -d ${datahome}/ ]; then
 cd ${datahome}
