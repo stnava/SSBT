@@ -326,7 +326,6 @@ for currentsubject in ${subjects} ; do
     img2=` ls $outdir/*${ext2} `
     img3=` ls $outdir/*${ext3} `
     ${analysishome}/pipelines/${pipelinedir}/ants_compcorr $img1 $img2 $img3
-exit
     rm $img1 $img2 $img3 
     echo job is completed at $outdir 
   fi
