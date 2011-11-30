@@ -20,7 +20,7 @@ if [[ -s $img ]] & [[ ${#img} -gt 3 ]]  ; then
                  -m MI[ $avg , $img , 1, 20, 50 ]                          
                  -t Rigid[0.01]  
                  -i 25  -u 1  -e 1  -s 0  -f 1  -n 10 
-                 -m CC[ $avg ,  $MOV , 1, 2 ]                          
+                 -m CC[ $avg ,  $img , 1, 2 ]                          
                  -t GaussianDisplacementField[0.15 , 3, 0.5 ]   
                  -i 10  -u 1  -e 1  -s 0  -f 1 -n 10 "
   $exe
