@@ -13,8 +13,8 @@ if [[ -s $img ]] & [[ ${#img} -gt 3 ]]  ; then
   ThresholdImage 3 $BM $BM 2 3 
   ImageMath 3 $BM ME $BM 1 
   ImageMath 3 $BM GetLargestComponent $BM 
-  ImageMath 3 $BM MD $BM  2
-  ImageMath 3 $BM ME $BM  1
+  ImageMath 3 $BM MD $BM  1
+#  ImageMath 3 $BM ME $BM  1
 else 
 echo $usage
 fi 

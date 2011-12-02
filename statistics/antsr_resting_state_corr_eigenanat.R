@@ -4,59 +4,63 @@ Args <- commandArgs()
 if ( length(Args) < 8  ){
 fnm<-Args[4]
 fnm<-substring(fnm,8,nchar(as.character(fnm)))
-print(paste("Usage - RScript  evecs.csv nuis.csv subject_id   "))
+print(paste("Usage - RScript subject_id  values_1.csv values_2.csv nuis.csv   "))
 print(paste(" ... " ))
-print(paste(" pairwise correlation of time series projections stored in a csv file  " ))
+print(paste(" pairwise regression of data stored in a csv file  " ))
+print(paste(" will compute a model of the form ::  " ))
+print(paste(" lm( values_1.csv ~ 1 + values_2.csv + nuis.csv  " ))
+print(paste(" and will return the value of the vector values2~values1 for every pair of v1,v2 values "))
+print(paste(" you can use this to do a voxelwise regression "))
 q()
 }
 ARGIND<-6
-evecs<-c(as.character(Args[ARGIND]))
+id<-c(as.character(Args[ARGIND]))
+ARGIND<-ARGIND+1
+cvecs1<-c(as.character(Args[ARGIND]))
+ARGIND<-ARGIND+1
+cvecs2<-c(as.character(Args[ARGIND]))
 ARGIND<-ARGIND+1
 nuiscsv<-c(as.character(Args[ARGIND]))
 ARGIND<-ARGIND+1
-id<-c(as.character(Args[ARGIND]))
-ARGIND<-ARGIND+1
- evecs<-read.csv(evecs)
+ vecs1<-read.csv(cvecs1)
+ vecs2<-read.csv(cvecs2)
  nuis<-read.csv(nuiscsv)
- print(dim(nuis))
- print(dim(evecs))
- nvox<-dim(evecs)[2]
+ nvox1<-dim(vecs1)[2]
+ nvox2<-dim(vecs2)[2]
  statform<-formula( vals1 ~ 1 + vals2 + as.matrix(nuis) )
- pvals<-matrix(rep(NA,nvox*nvox),nrow=nvox,ncol=nvox)
- betav<-matrix(rep(NA,nvox*nvox),nrow=nvox,ncol=nvox)
+ pvals<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
+ betav<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
  print("start stats")
- for ( x in c(1:nvox) ) 
+ for ( x in c(1:nvox1) ) 
  { 
-   vals1<-evecs[,x]
-   for ( y in c(1:nvox) ) 
+   vals1<-vecs1[,x]
+   for ( y in c(1:nvox2) ) 
    { 
-     if ( x != y )
-     {
-     vals2<-evecs[,y]
+     vals2<-vecs2[,y]
 #  pvalue of relationship with the ROI 
      modelresults<-(summary(lm(statform)))
 #     print(paste("x",x,"y",y,"pval",modelresults$coeff[2,4]))
      pvals[x,y]<-modelresults$coeff[2,4]
      betav[x,y]<-modelresults$coeff[2,3]
-     }
    }
  }
  print("done stats")
- qv<-matrix(p.adjust(pvals),nrow=nvox,ncol=nvox)
- for ( x in c(1:nvox) ) 
+ qv<-matrix(p.adjust(pvals),nrow=nvox1,ncol=nvox2)
+# qv<-pvals*(nvox1*nvox2)
+for ( x in c(1:nvox1) ) 
  { 
    ntw<-c("")
    ntwq<-c("")
-   for ( y in c(1:nvox) ) 
+   for ( y in c(1:nvox2) ) 
    { 
-     if ( x != y & qv[x,y] < 0.001 )
+     if ( x != y & qv[x,y] < 1.e-3 ) #  & betav[x,y] < 0.0 )
      {
        ntw<-paste(ntw,y-1)
        ntwq<-paste(ntwq, qv[x,y] )
      }
    }
    print(paste("Network_for_variate_",x-1,"includes variates:",ntw))
-#   print(paste("Network_for_variate_",x-1,"qvals:",ntwq))
+   print(paste("Network_for_variate_",x-1,"qvals:",ntwq))
  }
  betav<-betav*(qv <= 0.05) 
  dfm<-data.frame(betas=betav,qvals=1-qv,pvals=1-pvals)
