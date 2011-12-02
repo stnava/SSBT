@@ -300,6 +300,7 @@ clear
 myprocessstep=" ants_segment_and_compcorr "
 pipelinedir=${framework}
 cd ${resultshome}/${pipelinedir}/
+#subjects=913
 for currentsubject in ${subjects} ; do
   cd ${datahome}/${currentsubject}/
   sessions=` ls ` 
@@ -325,7 +326,7 @@ for currentsubject in ${subjects} ; do
     img1=` ls $outdir/*${ext1} `
     img2=` ls $outdir/*${ext2} `
     img3=` ls $outdir/*${ext3} `
-    ${analysishome}/pipelines/${pipelinedir}/ants_compcorr $img1 $img2 $img3
+    ${analysishome}/pipelines/${pipelinedir}/ants_compcorr $img1 $img2 $img3 ${analysishome}
     rm $img1 $img2 $img3 
     echo job is completed at $outdir 
   fi
