@@ -30,19 +30,18 @@ if ( length(args) > 10 )
   nuiscsv<-c(as.character(Args[ARGIND]))
   nuis<-read.csv(nuiscsv)
 }
+print(paste('read data',valuesIn))
 values<-read.csv(valuesIn)
 nvox1<-dim(values)[2]
 # first calculate the filter width for the butterworth based on TR and the desired frequency
 voxLo=round((1/freqLow)/tr) # remove anything below this (high-pass)
 voxHi=round((1/freqHi)/tr)   # keep anything above this
-
-print(paste("start filtering smoothing by",voxHi," and ",voxLow))
-progvals<-nvox1/1000
+print(paste("start filtering smoothing by",voxHi," and ",voxLo))
+progvals<-round(nvox1/100)
 for ( x in c(1:nvox1) ) 
 {
   modval<-(x %% progvals)
-  print(paste("modval",modval," x ",x))
-  if (  == 0 )
+  if ( modval == 1 )
   {
     print(paste('progress',x/nvox1*100,'%'))
   }  
@@ -53,9 +52,9 @@ for ( x in c(1:nvox1) )
   }
   vals1<-ts(vals1,frequency=1/tr)
   # butterworth low pass filter
-  getridoflow<-bwfilter(vals1, freq=voxLow,drift=TRUE)$cy 
+  getridoflow<-bwfilter(vals1, freq=voxLo,drift=TRUE)$cy 
   getridofhi<-bwfilter(getridoflow, freq=voxHi,drift=TRUE)$tr
-  filtered<-bwfilter(getridofhi, freq=voxLow,drift=TRUE)$cy 
+  filtered<-bwfilter(getridofhi, freq=voxLo,drift=TRUE)$cy 
   values[,x]<-filtered
 }
 write.csv(values,valuesOut,row.names = F,q=T)
