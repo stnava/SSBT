@@ -300,7 +300,7 @@ clear
 myprocessstep=" ants_segment_and_compcorr "
 pipelinedir=${framework}
 cd ${resultshome}/${pipelinedir}/
-#subjects=913
+# subjects=913
 for currentsubject in ${subjects} ; do
   cd ${datahome}/${currentsubject}/
   sessions=` ls ` 
@@ -360,7 +360,8 @@ echo "--------------------------------------------------------------------------
 cd ${datahome}/${currentsubject}/session_01/nifti/fMRI/
 if [ -s KKI*.nii.gz ]
 then
-${ANTSPATH}buildtemplateparallel.sh -d 4 -o ${currentsubject} $btp_params *.nii.gz >> ${resultshome}/ants_buildlog.txt
+echo already done
+# ${ANTSPATH}buildtemplateparallel.sh -d 4 -o ${currentsubject} $btp_params *.nii.gz >> ${resultshome}/ants_buildlog.txt
 else 
 echo "no file present in this directory; skipping to next"
 fi
@@ -368,7 +369,8 @@ fi
 cd ${datahome}/${currentsubject}/session_02/nifti/fMRI/
 if [ -s KKI*.nii.gz ]
 then
-${ANTSPATH}buildtemplateparallel.sh -d 4 -o ${currentsubject} $btp_params *.nii.gz >> ${resultshome}/ants_buildlog.txt
+echo already done 
+# ${ANTSPATH}buildtemplateparallel.sh -d 4 -o ${currentsubject} $btp_params *.nii.gz >> ${resultshome}/ants_buildlog.txt
 else 
 echo "no file present in this directory; skipping to next"
 fi
@@ -377,8 +379,10 @@ done
 # Move individual subject templates to GrpBoldTemplate folders in ${resultshome}
 for currentsubject in ${subjects}
 do
-mv ${datahome}/${currentsubject}/session_01/nifti/fMRI/${currentsubject}template.nii.gz $S1GT
-mv ${datahome}/${currentsubject}/session_02/nifti/fMRI/${currentsubject}template.nii.gz $S2GT
+# mv ${datahome}/${currentsubject}/session_01/nifti/fMRI/${currentsubject}template.nii.gz $S1GT
+# mv ${datahome}/${currentsubject}/session_02/nifti/fMRI/${currentsubject}template.nii.gz $S2GT
+cp ${resultshome}/${pipelinedir}/session_01/moco/*vg.nii.gz $S1GT
+cp ${resultshome}/${pipelinedir}/session_02/moco/*vg.nii.gz $S2GT
 cp $S1GT/${currentsubject}template.nii.gz ${resultshome}/${pipelinedir}/01_singlesub_template/session_01/
 cp $S2GT/${currentsubject}template.nii.gz ${resultshome}/${pipelinedir}/01_singlesub_template/session_02/
 done
