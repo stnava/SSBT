@@ -32,7 +32,7 @@ for x in 1 2 3 ; do N3BiasFieldCorrection 3 $imgavg $imgavg 1 $imgbrainmask ; do
 ThresholdImage 3 ${OUT}_seg.nii.gz ${OUT}_cortmask.nii.gz 2 2
 sccan  --timeseriesimage-to-matrix [$imgmoco,${OUT}_cortmask.nii.gz, 0.0 , 0.0 ] -o ${OUT}.csv
 tr=2
-Rscript ${analysishome}antsr_frequency_filter.R ${OUT}.csv ${OUT}.csv $tr 0.03 0.08 ${OUT}_compcorr_compcorr.csv 
-sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,0.9] -n 40 -i 40 --PClusterThresh 200  -o ${OUT}_RSF_Networks.nii.gz 
-# sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,-0.1] -n 20 -i 40 --PClusterThresh 20  -o ${OUT}_RSF_Networks.nii.gz 
+Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}.csv ${OUT}.csv $tr 0.03 0.06 ${OUT}_compcorr_compcorr.csv 
+# sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,0.9] -n 40 -i 40 --PClusterThresh 200  -o ${OUT}_RSF_Networks.nii.gz 
+ sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,-0.1] -n 20 -i 40 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz 
 Rscript  ${analysishome}/statistics/antsr_resting_state_corr_eigenanat.R ${OUT}_ea_rsf ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_RSF_NetworksprojectionsView1vec.csv  ${OUT}_compcorr_compcorr.csv 
