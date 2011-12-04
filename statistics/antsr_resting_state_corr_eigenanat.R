@@ -34,55 +34,12 @@ ARGIND<-ARGIND+1
  pvals<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
  betav<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
  print("start stats")
- # generate band-pass butterworth filter 
-# bf <- butter(3, c(0.03,0.06),type=c("pass")) # 0.03 - 0.06 Hz low-pass filter, order 3
-# bf <- butter(6, c(0.03,0.06)*2,type=c("stop")) # 0.03 - 0.06 Hz low-pass filter, order 6, adjusted for TR
-# hip <- butter(6, c(0.03)*2,type=c("high")) # 0.03 - 0.06 Hz low-pass filter, order 6, adjusted for TR
-# tr=2
-# vals1<-ts(dd$V4969,frequency=1/tr)
-# lv<-0.03
-# lop <- butter(3, c(lv),type=c("high")) # 0.03 - 0.06 Hz low-pass filter, order 6, adjusted for TR
-# lowfilt<-filter(vals1,lop,method="recursive",sides=2)
-# plot(lowfilt)
-
-# plot(vals1)
-# lines(vals1l,col='blue')
-# lines(vals1lh,col='red')
-# plot(vals1lh)
-
-# firfilt<-fir1(10, c(0.03, 0.06), "pass")
-# passfilt<-filter(vals1,lop)
-
-# vals1MinusLow <- vals1 - 
-# plot(vals1,type='l')
-# plot(vals1MinusLow,col='red')
-# vals1MinusLowMinusHigh <- vals1MinusLow - filter(hip, vals1MinusLow)
-
  for ( x in c(1:nvox1) ) 
  { 
-   TR=2
    vals1<-residuals(lm(vecs1[,x]~1+as.matrix(nuis)))
-   vals1<-ts(vals1,frequency=1/TR)
-   # boxcar for low freq
-   lfiltlength<-(( 1 / 0.03 )/TR)
-   lofilt<-filter(vals1,filter=rep(1/lfiltlength,lfiltlength),sides=2) # ,method="r",circular=T)
-   vals1l=vals1-lofilt 
-   # boxcar for high freq
-   hfiltlength<-(( 1 / 0.06 )/TR)
-   hifilt<-filter(vals1,filter=rep(1/hfiltlength,hfiltlength),sides=2) # ,method="r",circular=T)
-   vals1lh=vals1-hifilt-lofilt 
    for ( y in c(1:nvox2) ) 
    { 
-   vals2<-residuals(lm(vecs2[,y]~1+as.matrix(nuis)))
-   vals2<-ts(vals2,frequency=1/TR)
-   # boxcar for low freq
-   lfiltlength<-(( 1 / 0.03 )/TR)
-   lofilt<-filter(vals2,filter=rep(1/lfiltlength,lfiltlength),sides=2) # ,method="r",circular=T)
-   vals2l=vals2-lofilt 
-   # boxcar for high freq
-   hfiltlength<-(( 1 / 0.06 )/TR)
-   hifilt<-filter(vals2,filter=rep(1/hfiltlength,hfiltlength),sides=2) # ,method="r",circular=T)
-   vals2lh=vals2-hifilt-lofilt 
+     vals2<-residuals(lm(vecs2[,y]~1+as.matrix(nuis)))
 #  pvalue of relationship with the ROI 
      modelresults<-(summary(lm(statform)))
 #     print(paste("x",x,"y",y,"pval",modelresults$coeff[2,4]))
@@ -99,7 +56,7 @@ for ( x in c(1:nvox1) )
    ntwq<-c("")
    for ( y in c(1:nvox2) ) 
    { 
-     if ( x != y & qv[x,y] < 0.05 ) #  & betav[x,y] < 0.0 )
+     if ( x != y & qv[x,y] < 0.01  ) # & betav[x,y] < 0.0 )
      {
        ntw<-paste(ntw,y-1)
        ntwq<-paste(ntwq, qv[x,y] )
@@ -111,3 +68,4 @@ for ( x in c(1:nvox1) )
  betav<-betav*(qv <= 0.05) 
  dfm<-data.frame(betas=betav,qvals=1-qv,pvals=1-pvals)
  write.csv(dfm,paste(id,'qvals.csv',sep=''),row.names = F,q=T)
+ 
