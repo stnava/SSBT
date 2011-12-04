@@ -20,7 +20,7 @@ valuesOut<-c(as.character(Args[ARGIND]))
 ARGIND<-ARGIND+1
 tr<-c(as.numeric(Args[ARGIND]))
 ARGIND<-ARGIND+1
-freqLow<-c(as.numeric(Args[ARGIND]))
+freqLo<-c(as.numeric(Args[ARGIND]))
 ARGIND<-ARGIND+1
 freqHi<-c(as.numeric(Args[ARGIND]))
 ARGIND<-ARGIND+1
@@ -33,9 +33,12 @@ if ( length(args) > 10 )
 print(paste('read data',valuesIn))
 values<-read.csv(valuesIn)
 nvox1<-dim(values)[2]
+ntimeseries<-dim(values)[1]
 # first calculate the filter width for the butterworth based on TR and the desired frequency
-voxLo=round((1/freqLow)/tr) # remove anything below this (high-pass)
+voxLo=round((1/freqLo)/tr) # remove anything below this (high-pass)
 voxHi=round((1/freqHi)/tr)   # keep anything above this
+voxLo=round((1/freqLo)) # remove anything below this (high-pass)
+voxHi=round((1/freqHi))   # keep anything above this
 print(paste("start filtering smoothing by",voxHi," and ",voxLo))
 progvals<-round(nvox1/100)
 for ( x in c(1:nvox1) ) 
@@ -43,7 +46,7 @@ for ( x in c(1:nvox1) )
   modval<-(x %% progvals)
   if ( modval == 1 )
   {
-    print(paste('progress',x/nvox1*100,'%'))
+    print(paste('progress',round(x/nvox1*100),'%'))
   }  
   vals1<-values[,x]
   if ( !is.na(nuis) )
@@ -52,9 +55,18 @@ for ( x in c(1:nvox1) )
   }
   vals1<-ts(vals1,frequency=1/tr)
   # butterworth low pass filter
-  getridoflow<-bwfilter(vals1, freq=voxLo,drift=TRUE)$cy 
-  getridofhi<-bwfilter(getridoflow, freq=voxHi,drift=TRUE)$tr
-  filtered<-bwfilter(getridofhi, freq=voxLo,drift=TRUE)$cy 
+#  getridoflow<-bwfilter(vals1, freq=voxLo,drift=TRUE)$cy 
+#  getridofhi<-bwfilter(getridoflow, freq=voxHi,drift=TRUE)$tr
+# filtered<-bwfilter(getridofhi, freq=voxLo,drift=TRUE)$cy 
+# band-pass filter
+#  filtered<-bkfilter(vals1,pl=voxLo,pu=voxHi,nfix=NULL,type=c("fixed","variable"),drift=FALSE)
+#  filtered<-cffilter(vals1,pl=voxHi,pu=voxLo,drift=FALSE)$tr
+  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="f"))
+  filtered[1,]<-NA
+  filtered[2,]<-NA
+  filtered[ntimeseries-2,]<-NA
+  filtered[ntimeseries-1,]<-NA
+  filtered[ntimeseries,]<-NA
   values[,x]<-filtered
 }
 write.csv(values,valuesOut,row.names = F,q=T)
