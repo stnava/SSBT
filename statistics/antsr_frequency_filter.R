@@ -2,7 +2,8 @@
 Args <- commandArgs()
 # library("signal")
 library("timeSeries")
-library(mFilter)
+library("mFilter")
+library("MASS")
 # print(paste("length of args is ", length(Args)))
 if ( length(Args) < 8  ){
 fnm<-Args[4]
@@ -25,10 +26,12 @@ ARGIND<-ARGIND+1
 freqHi<-c(as.numeric(Args[ARGIND]))
 ARGIND<-ARGIND+1
 nuis<-NA
-if ( length(args) > 10 )
+useNuis<-FALSE
+if ( length(Args) > 10 )
 {
   nuiscsv<-c(as.character(Args[ARGIND]))
   nuis<-read.csv(nuiscsv)
+  useNuis<-TRUE
 }
 print(paste('read data',valuesIn))
 values<-read.csv(valuesIn)
@@ -37,8 +40,8 @@ ntimeseries<-dim(values)[1]
 # first calculate the filter width for the butterworth based on TR and the desired frequency
 voxLo=round((1/freqLo)/tr) # remove anything below this (high-pass)
 voxHi=round((1/freqHi)/tr)   # keep anything above this
-voxLo=round((1/freqLo)) # remove anything below this (high-pass)
-voxHi=round((1/freqHi))   # keep anything above this
+# voxLo=round((1/freqLo)) # remove anything below this (high-pass)
+# voxHi=round((1/freqHi))   # keep anything above this
 print(paste("start filtering smoothing by",voxHi," and ",voxLo))
 progvals<-round(nvox1/100)
 if ( progvals < 100 ) progvals<-1
@@ -49,21 +52,22 @@ for ( x in c(1:nvox1) )
   {
     print(paste('progress',round(x/nvox1*100),'%'))
   }  
-  vals1<-values[,x]
-  if ( !is.na(nuis) )
+  myTimeSeries<-values[,x]
+  if ( useNuis )
   {
-    vals1<-residuals(lm(values[,x]~1+as.matrix(nuis)))
+#    print("robust regression")
+    myTimeSeries<-residuals(lqs(values[,x]~1+as.matrix(nuis)))
   }
-  vals1<-ts(vals1,frequency=1/tr)
+  myTimeSeries<-ts(myTimeSeries,frequency=1)
   # butterworth low pass filter
-#  getridoflow<-bwfilter(vals1, freq=voxLo,drift=TRUE)$cy 
+#  getridoflow<-bwfilter(myTimeSeries, freq=voxLo,drift=TRUE)$cy 
 #  getridofhi<-bwfilter(getridoflow, freq=voxHi,drift=TRUE)$tr
 # filtered<-bwfilter(getridofhi, freq=voxLo,drift=TRUE)$cy 
 # band-pass filter
-#  filtered<-bkfilter(vals1,pl=voxLo,pu=voxHi,nfix=NULL,type=c("fixed","variable"),drift=FALSE)
-#  filtered<-cffilter(vals1,pl=voxHi,pu=voxLo,drift=FALSE)$tr
-#  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="f"))
-  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="t"))
+#  filtered<-bkfilter(myTimeSeries,pl=voxLo,pu=voxHi,nfix=NULL,type=c("fixed","variable"),drift=FALSE)
+#  filtered<-cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=FALSE)$tr
+#  filtered<-residuals(cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T,type="f"))
+  filtered<-residuals(cffilter(myTimeSeries,pl=voxHi,pu=voxLo,drift=T,type="t"))
   #  could also use a boxcar filter: for band-pass filtering - a low-pass filter is applied and then a high-pass filter is applied to the resulting time-series.
   filtered[1,]<-filtered[3,]
   filtered[2,]<-filtered[3,]
@@ -71,15 +75,16 @@ for ( x in c(1:nvox1) )
   filtered[ntimeseries,]<-filtered[ntimeseries-2,]
 #  plot(filtered)
 #  spec.ar(filtered[5:ntimeseries-5,])
-  values[,x]<-filtered
+  filteredTimeSeries<-ts(filtered,frequency=1)
+  values[,x]<-filteredTimeSeries
   if ( x == 5 )
   {
     pdf(gsub('.csv','VisualizeTimeSeriesFiltering.pdf',valuesOut))
     par(mfrow=c(2,2))
-    plot(vals1,type='l')
-    spec.pgram( vals1, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
-    plot(filtered,type='l')
-    spec.pgram( filtered, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
+    plot(myTimeSeries,type='l')
+    spec.pgram( myTimeSeries, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
+    plot(filteredTimeSeries,type='l')
+    spec.pgram( filteredTimeSeries, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
     dev.off()
   }
 }
