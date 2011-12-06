@@ -33,10 +33,10 @@ mocoparams=` ls ${OUT:0:${#OUT}-5}*MOCOparams.csv `
  ThresholdImage 3 ${OUT}_seg.nii.gz ${OUT}_cortmask.nii.gz 2 2
  sccan  --timeseriesimage-to-matrix [$imgmoco,${OUT}_cortmask.nii.gz, 0.0 , 0.0 ] -o ${OUT}.csv
 # parcellate the image
-Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}.csv ${OUT}_filt.csv $tr 0.02 0.06 ${OUT}_compcorr_compcorr.csv  
- sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,-0.15,${OUT}_compcorr_compcorr.csv] -n 40 -i 40 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz   --partial-scca-option PminusRQ
+# Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}.csv ${OUT}_filt.csv $tr 0.03 0.08 ${OUT}_compcorr_compcorr.csv  
+ sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,-0.15,${OUT}_compcorr_compcorr.csv] -n 40 -i 20 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz   --partial-scca-option PQ
 tr=1.5
-Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_filt.csv $tr 0.02 0.06 ${OUT}_compcorr_compcorr.csv  
+ Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_filt.csv $tr 0.03 0.08 ${OUT}_compcorr_compcorr.csv  
 # sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,0.9] -n 20 -i 40 --PClusterThresh 200  -o ${OUT}_RSF_Networks.nii.gz 
 # 
-Rscript  ${analysishome}/statistics/antsr_resting_state_corr_eigenanat.R ${OUT}_ea_rsf ${OUT}_filt.csv ${OUT}_filt.csv  ${OUT}_compcorr_compcorr.csv  $mocoparams
+ Rscript  ${analysishome}/statistics/antsr_resting_state_corr_eigenanat.R ${OUT}_ea_rsf ${OUT}_filt.csv ${OUT}_filt.csv  ${OUT}_compcorr_compcorr.csv  $mocoparams

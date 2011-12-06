@@ -37,8 +37,8 @@ ntimeseries<-dim(values)[1]
 # first calculate the filter width for the butterworth based on TR and the desired frequency
 voxLo=round((1/freqLo)/tr) # remove anything below this (high-pass)
 voxHi=round((1/freqHi)/tr)   # keep anything above this
-# voxLo=round((1/freqLo)) # remove anything below this (high-pass)
-# voxHi=round((1/freqHi))   # keep anything above this
+voxLo=round((1/freqLo)) # remove anything below this (high-pass)
+voxHi=round((1/freqHi))   # keep anything above this
 print(paste("start filtering smoothing by",voxHi," and ",voxLo))
 progvals<-round(nvox1/100)
 if ( progvals < 100 ) progvals<-1
