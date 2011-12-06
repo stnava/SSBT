@@ -78,7 +78,7 @@ for ( x in c(1:nvox1) )
    ntwq<-c("")
    for ( y in c(1:nvox2) ) 
    { 
-     if ( x != y & qv[x,y] < 0.01  & betav[x,y] < 0.0 )
+     if ( x != y & qv[x,y] < 0.001 ) # & betav[x,y] < 0.0 )
      {
        ntw<-paste(ntw,y-1)
        ntwq<-paste(ntwq, qv[x,y] )

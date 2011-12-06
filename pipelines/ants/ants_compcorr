@@ -3,6 +3,7 @@ imgmoco=$1
 imgbrainmask=$2
 imgavg=$3 
 analysishome=$4
+tr=1.5
 usage=" $0 moco-image brain-mask " 
 if [[ ${#imgmoco} -lt 1 ]] ; then 
   echo " please set a valid moco image - you set $imgmoco "
@@ -32,12 +33,12 @@ mocoparams=` ls ${OUT:0:${#OUT}-5}*MOCOparams.csv `
  Atropos -d 3 -a $imgavg -a ${OUT}_compcorr_variance.nii.gz -m [0.3,1x1x1] -o ${OUT}_seg.nii.gz -c [5,0] -i kmeans[3] -x $imgbrainmask 
  ThresholdImage 3 ${OUT}_seg.nii.gz ${OUT}_cortmask.nii.gz 2 2
  sccan  --timeseriesimage-to-matrix [$imgmoco,${OUT}_cortmask.nii.gz, 0.0 , 0.0 ] -o ${OUT}.csv
+ freqs=" 0.03 0.1 "
+ Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}.csv ${OUT}_filt.csv $tr $freqs ${OUT}_compcorr_compcorr.csv
 # parcellate the image
- Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}.csv ${OUT}_filt.csv $tr 0.03 0.06 ${OUT}_compcorr_compcorr.csv  
-# sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,-0.15,${OUT}_compcorr_compcorr.csv] -n 40 -i 20 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz   # --partial-scca-option PminusRQ
- sccan  --sparse-svd [${OUT}_filt.csv,${OUT}_cortmask.nii.gz,0.9] -n 40 -i 40 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz 
-tr=1.5
- Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_filt_sccan.csv $tr 0.03 0.1 ${OUT}_compcorr_compcorr.csv  
+ sccan  --sparse-svd [${OUT}_filt.csv,${OUT}_cortmask.nii.gz,-0.15] -n 40 -i 40 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz   # --partial-scca-option PminusRQ
+# sccan  --sparse-svd [${OUT}_filt.csv,${OUT}_cortmask.nii.gz,0.9] -n 40 -i 40 --PClusterThresh 50  -o ${OUT}_RSF_Networks.nii.gz 
+# Rscript ${analysishome}statistics/antsr_frequency_filter.R ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_filt_sccan.csv $tr $freqs ${OUT}_compcorr_compcorr.csv  
 # sccan  --sparse-svd [${OUT}.csv,${OUT}_cortmask.nii.gz,0.9] -n 20 -i 40 --PClusterThresh 200  -o ${OUT}_RSF_Networks.nii.gz 
 # 
- Rscript  ${analysishome}/statistics/antsr_resting_state_corr_eigenanat.R ${OUT}_ea_rsf ${OUT}_filt_sccan.csv ${OUT}_filt_sccan.csv  ${OUT}_compcorr_compcorr.csv  $mocoparams
+ Rscript  ${analysishome}/statistics/antsr_resting_state_corr_eigenanat.R ${OUT}_ea_rsf ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_RSF_NetworksprojectionsView1vec.csv ${OUT}_compcorr_compcorr.csv  $mocoparams
