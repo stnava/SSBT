@@ -1,8 +1,9 @@
 #!/usr/bin/env Rscript
 Args <- commandArgs()
 #
-library("signal")
-library("timeSeries")
+# library("signal")
+# library("timeSeries")
+# print(paste("length of args ",length(Args)))
 if ( length(Args) < 8  ){
 fnm<-Args[4]
 fnm<-substring(fnm,8,nchar(as.character(fnm)))
@@ -22,24 +23,45 @@ cvecs1<-c(as.character(Args[ARGIND]))
 ARGIND<-ARGIND+1
 cvecs2<-c(as.character(Args[ARGIND]))
 ARGIND<-ARGIND+1
-nuiscsv<-c(as.character(Args[ARGIND]))
-ARGIND<-ARGIND+1
  vecs1<-read.csv(cvecs1)
  vecs2<-read.csv(cvecs2)
- nuis<-read.csv(nuiscsv)
  nvox1<-dim(vecs1)[2]
+ nts<-dim(vecs1)[1]
  nvox2<-dim(vecs2)[2]
- statform<-formula( vals1 ~ 1 + vals2 + as.matrix(nuis) )
+ nuis<-NA
+ nuis2<-NA
  statform<-formula( vals1 ~ 1 + vals2 )
+ if ( length(Args) > 8 )
+ {
+   nuiscsv<-c(as.character(Args[ARGIND]))
+   ARGIND<-ARGIND+1
+   nuis<-read.csv(nuiscsv)
+   statform<-formula( vals1 ~ 1 + vals2 + as.matrix(nuis) )
+ }
+ if ( length(Args) > 9 )
+ {
+   nuiscsv<-c(as.character(Args[ARGIND]))
+   nuis2<-read.csv(nuiscsv)
+   statform<-formula( vals1 ~ 1 + vals2 + as.matrix(nuis) + as.matrix(nuis2) )
+ }
  pvals<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
  betav<-matrix(rep(NA,nvox1*nvox2),nrow=nvox1,ncol=nvox2)
  print("start stats")
  for ( x in c(1:nvox1) ) 
  { 
-   vals1<-residuals(lm(vecs1[,x]~1+as.matrix(nuis)))
+   if ( !is.na(nuis) && is.na(nuis2) )
+     vals1<-residuals(lm(vecs1[,x]~1+as.matrix(nuis)))
+   else if ( !is.na(nuis) && !is.na(nuis2) ) 
+     vals1<-residuals(lm(vecs1[,x]~1+as.matrix(nuis)+as.matrix(nuis2)))
+   else vals1<-vecs1[,x]
+
    for ( y in c(1:nvox2) ) 
-   { 
+   {
+   if ( !is.na(nuis) && is.na(nuis2) )
      vals2<-residuals(lm(vecs2[,y]~1+as.matrix(nuis)))
+   else if ( !is.na(nuis) && !is.na(nuis2) )
+     vals2<-residuals(lm(vecs2[,y]~1+as.matrix(nuis)+as.matrix(nuis2)))
+   else vals2<-vecs2[,y]
 #  pvalue of relationship with the ROI 
      modelresults<-(summary(lm(statform)))
 #     print(paste("x",x,"y",y,"pval",modelresults$coeff[2,4]))
@@ -56,7 +78,7 @@ for ( x in c(1:nvox1) )
    ntwq<-c("")
    for ( y in c(1:nvox2) ) 
    { 
-     if ( x != y & qv[x,y] < 0.01  ) # & betav[x,y] < 0.0 )
+     if ( x != y & qv[x,y] < 0.01  & betav[x,y] < 0.0 )
      {
        ntw<-paste(ntw,y-1)
        ntwq<-paste(ntwq, qv[x,y] )

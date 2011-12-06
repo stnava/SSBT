@@ -37,10 +37,11 @@ ntimeseries<-dim(values)[1]
 # first calculate the filter width for the butterworth based on TR and the desired frequency
 voxLo=round((1/freqLo)/tr) # remove anything below this (high-pass)
 voxHi=round((1/freqHi)/tr)   # keep anything above this
-voxLo=round((1/freqLo)) # remove anything below this (high-pass)
-voxHi=round((1/freqHi))   # keep anything above this
+# voxLo=round((1/freqLo)) # remove anything below this (high-pass)
+# voxHi=round((1/freqHi))   # keep anything above this
 print(paste("start filtering smoothing by",voxHi," and ",voxLo))
 progvals<-round(nvox1/100)
+if ( progvals < 100 ) progvals<-1
 for ( x in c(1:nvox1) ) 
 {
   modval<-(x %% progvals)
@@ -61,12 +62,25 @@ for ( x in c(1:nvox1) )
 # band-pass filter
 #  filtered<-bkfilter(vals1,pl=voxLo,pu=voxHi,nfix=NULL,type=c("fixed","variable"),drift=FALSE)
 #  filtered<-cffilter(vals1,pl=voxHi,pu=voxLo,drift=FALSE)$tr
-  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="f"))
-  filtered[1,]<-NA
-  filtered[2,]<-NA
-  filtered[ntimeseries-2,]<-NA
-  filtered[ntimeseries-1,]<-NA
-  filtered[ntimeseries,]<-NA
+#  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="f"))
+  filtered<-residuals(cffilter(vals1,pl=voxHi,pu=voxLo,drift=T,type="t"))
+  #  could also use a boxcar filter: for band-pass filtering - a low-pass filter is applied and then a high-pass filter is applied to the resulting time-series.
+  filtered[1,]<-filtered[3,]
+  filtered[2,]<-filtered[3,]
+  filtered[ntimeseries-1,]<-filtered[ntimeseries-2,]
+  filtered[ntimeseries,]<-filtered[ntimeseries-2,]
+#  plot(filtered)
+#  spec.ar(filtered[5:ntimeseries-5,])
   values[,x]<-filtered
+  if ( x == 5 )
+  {
+    pdf(gsub('.csv','VisualizeTimeSeriesFiltering.pdf',valuesOut))
+    par(mfrow=c(2,2))
+    plot(vals1,type='l')
+    spec.pgram( vals1, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
+    plot(filtered,type='l')
+    spec.pgram( filtered, taper=0, fast=FALSE, detrend=F,demean=F, log="n")
+    dev.off()
+  }
 }
 write.csv(values,valuesOut,row.names = F,q=T)
