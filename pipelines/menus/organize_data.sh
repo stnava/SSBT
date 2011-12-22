@@ -1,6 +1,6 @@
 #!/bin/bash
 
-test_path () {
+test_path_wr () {
 test_loc=`dirname ${choice}`
 if [ ! -w ${test_loc} ]
 then
@@ -176,7 +176,12 @@ echo -n " Please type the datapath : "
 read choice
 
 # testing for valid user input
+if [ ${#choice} -ne 0 ]
+then
 test_path_wr ${choice}
+else
+wiz_01
+fi
 
 if [ $? -eq 0  ]
 then
