@@ -61,10 +61,11 @@ esac
 done
 }
 
+cfg_file=$1
 # main script starts here
 if [ $# -lt 1 ] ; then 
 main_menu
-elif [ -f ${1} ] && [[ ${1} =~ "dependencies" ]]
+elif [ -f ${cfg_file} ] && [[ ${cfg_file} =~ "dependencies" ]]
 then
 source $1
 main_menu

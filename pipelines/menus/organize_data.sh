@@ -1,17 +1,22 @@
 #!/bin/bash
 
 test_path_wr () {
+echo "test path if writable"
+
 test_loc=`dirname ${choice}`
 if [ ! -w ${test_loc} ]
 then
 echo "\"$test_loc\" is not a writable location "
 sleep 1 
 return 0
+else
+# echo "\"$test_loc\" is a writable location "
+return 1
 fi
 }
 
 test_path_exist () {
-echo "test path"
+echo "test path if exists"
 
 if [ -d ${choice} ]
 then
@@ -62,6 +67,9 @@ else
 fi
 }
 
+####################################################################
+# MENU option 1 - Code start
+####################################################################
 wiz_01_proc (){
 echo " ">> ${cfgtmp}/antsr_cfg.sh
 echo "# experiment path" >> ${cfgtmp}/antsr_cfg.sh
@@ -186,8 +194,8 @@ fi
 if [ $? -eq 0  ]
 then
     wiz_01
-else
-
+elif [ $? -eq 1  ]
+then
     test_path_exist ${choice}
 
     if [ $? -eq 0  ]
@@ -429,8 +437,8 @@ The folder structure for you data is now set up. Please store your nifti files
 in the appropriate folders, i.e. 
 
 ${exp_path}/data/session_01/run_01
-    ├── subject_01.nii.gz
-    ├── subject_02.nii.gz
+    ├── subject_01.nii.gz or 001.nii.gz
+    ├── subject_02.nii.gz or 002.nii.gz
     ├── etc...
 
 Files in scanner source format can often be converted with dcm2nii (part of 
@@ -439,7 +447,7 @@ MRICron): http://www.mccauslandcenter.sc.edu/CRNL/tools
 Name your subject time-series files in a systematic way, so that they can be 
 batch processed. A subjectID should only have numeric or alphabetic characters 
 or underscore and should never include characters such as @ ! # space etc.
-
+Name the files of a single subject in different sessions/runs the same.
 Once your are done, continue the analysis by restarting: 
 antsmain.sh ${exp_path}/scripts/dependencies.sh
 -------------------------------------------------------------------------------
@@ -448,6 +456,131 @@ Written by Brian Avants & Niels van Strien, 2011/2012
 MENU
 exit
 }
+####################################################################
+# MENU option 1 - Code end
+####################################################################
+####################################################################
+# MENU option 2 - Code start
+####################################################################
+test_data_proc () {
+clear
+for ((i = 1; i <= ${ses} ; i++))
+do
+  if [ ${i} -lt 10 ]
+  then
+    for ((j = 1; j <= ${runs} ; j++))
+    do
+    if [ ${j} -lt 10 ]
+    then
+    echo " "
+    subarray=(`find ${exp_path}/data/session_0${i}/run_0${j}/* -prune -type f | tr " " "\n"`) # now it is a real array
+#    echo ${#subarray[@]}
+ 
+    # explicitly assign dynamically named  array
+    eval declare -a sub_ses0${i}_run_0${j}
+    # fill dynamically named  array    
+    for ((k = 0; k <= ${#subarray[@]}-1 ; k++))
+    do
+    eval sub_ses0${i}_run_0${j}[k]=${subarray[k]}
+    done
+    echo "session_0${i} run_0${j} subjects:"
+    eval echo $\{sub_ses0${i}_run_0${j}[@]\}
+    echo "session_0${i} run_0${j} number:"
+    eval echo $\{#sub_ses0${i}_run_0${j}[@]\}
+
+#    ls ${exp_path}/data/session_0${i}/run_0${j}
+    sleep 1
+    else
+    echo " "
+    echo "session_0${i} run_${j} subjects:"
+    ls ${exp_path}/data/session_0${i}/run_${j}
+    sleep 1
+    fi
+    done
+  else 
+    for ((j = 1; j <= ${runs} ; j++))
+    do
+    if [ ${j} -lt 10 ]
+    then
+    echo " "
+    echo "session_0${i} run_0${j} subjects:"
+    ls ${exp_path}/data/session_${i}/run_0${j}
+    sleep 1
+    else
+    echo " "
+    echo "session_${i} run_${j} subjects:"
+    ls ${exp_path}/data/session_${i}/run_${j}
+    sleep 1
+    fi
+    done
+  fi
+done
+sleep 10
+clear
+}
+
+
+test_data () {
+clear
+if [ ! -e ${cfg_file} ] || [ ${#cfg_file} -eq 0 ]
+then
+echo "Could not find dependencies.sh file. Use option 1 to create "
+echo "a configuration file, or restart this script with the . "
+echo "appropriate dependencies.sh file. "
+sleep 4
+data_menu
+fi
+
+while : # Loop forever
+do
+cat <<MENU
+-------------------------------------------------------------------------------
+ANTS functional MRI data processing pipeline - Data test
+-------------------------------------------------------------------------------
+
+These are the settings in your config file.
+
+experiment root: 	${exp_path}
+data root:		${exp_path}/data
+results:		${resultshome}
+
+no sessions:		${ses}
+no runs:		${runs}
+
+Continue tests? (y/n)
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+Written by Brian Avants & Niels van Strien, 2011/2012
+-------------------------------------------------------------------------------
+MENU
+
+echo -n " Your choice : "
+read choice
+
+case $choice in
+y) test_data_proc ;;
+n) data_menu ;;
+*) echo "\"$choice\" is not valid "; sleep 2 ;;
+esac
+
+done
+}
+
+
+
+
+####################################################################
+# MENU option 2 - Code end
+####################################################################
+
+
+
 
 data_menu () {
 clear
@@ -485,7 +618,7 @@ read choice
 
 case $choice in
 1) wiz_01 ;;
-2) echo "not implemented yet"; sleep 2 ;;
+2) test_data ;;
 3) main_menu ;;
 4) bye ;;
 *) echo "\"$choice\" is not valid "; sleep 2 ;;
