@@ -10,13 +10,13 @@ showBar () {
  blankSpaces=$(echo $((100-$barLen)))
  for (( f=0; f<$blankSpaces; f++ ))
  do
-  fills=$fills"-"
+  fills=$fills"_"
  done
  clear
  echo "-------------------------------------------------------------------------------"
  echo ${Procedure}
  echo "-------------------------------------------------------------------------------"
- echo "Progress: "
+ echo "Overall progress: "
  echo '['$bar'>'$fills'] - '$barLen'%'
  echo "-------------------------------------------------------------------------------"
 }
@@ -32,8 +32,8 @@ exe="ants_moco -d 3 -o [ ${outname} , ${outname}moco.nii.gz , ${avg} ]
 		-t Rigid[0.01]  
 		-i 25  -u 1  -e 1  -s 0  -f 1  -n 25 "
 echo
-echo "Running rigid motion correction on ${inname}, please wait."
-echo "Progress can be seen in ${outname}_mcr_progress.txt"
+echo "Running rigid motion correction on `basename ${inname}`, please wait."
+echo "Progress can be seen in `basename ${outname}_mcr_progress.txt`"
 echo
 $exe >> ${outname}_mcr_progress.txt
 
@@ -53,13 +53,25 @@ exe="ants_moco -d 3 -o [ ${inname} , ${inname}moconr.nii.gz , ${avg}]
 		-t GaussianDisplacementField[0.15 , 3, 0.5 ]   
 		-i 10  -u 1  -e 1  -s 0  -f 1 -n 10 "
 echo
-echo "Running non-rigid motion correction on ${inname}, please wait."
-echo "Progress can be seen in ${outname}_mcnr_progress.txt"
+echo "Running non-rigid motion correction on `basename ${inname}`, please wait."
+echo "Progress can be seen in `basename ${outname}_mcnr_progress.txt`"
 echo
 $exe >> ${outname}_mcnr_progress.txt
 
 }
 
+ants_bxt () {
 
+inname=${infname}
+outname=${OUT}
+BM=${OUT}_brainmask.nii.gz
+ThresholdImage 3 $img $BM Otsu 3
+ThresholdImage 3 $BM $BM 2 3 
+ImageMath 3 $BM ME $BM 1 
+ImageMath 3 $BM GetLargestComponent $BM 
+ImageMath 3 $BM MD $BM  1
+#  ImageMath 3 $BM ME $BM  1
+
+}
 
 
