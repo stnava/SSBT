@@ -1,4 +1,25 @@
-#! /bin/bash
+showBar () {
+ percDone=$(echo 'scale=2;'$1/$2*100 | bc)
+ barLen=$(echo ${percDone%'.00'})
+ bar=''
+ fills=''
+ for (( b=0; b<$barLen; b++ ))
+ do
+  bar=$bar"*"
+ done
+ blankSpaces=$(echo $((100-$barLen)))
+ for (( f=0; f<$blankSpaces; f++ ))
+ do
+  fills=$fills"-"
+ done
+ clear
+ echo "-------------------------------------------------------------------------------"
+ echo ${Procedure}
+ echo "-------------------------------------------------------------------------------"
+ echo "Progress: "
+ echo '['$bar'>'$fills'] - '$barLen'%'
+ echo "-------------------------------------------------------------------------------"
+}
 
 mc_ants_rigid () {
 
@@ -39,20 +60,6 @@ $exe >> ${outname}_mcnr_progress.txt
 
 }
 
-infname=$1
-usage=" $0 timeseriesimage " 
-if [[ ${#infname} -lt 1 ]] ; then 
-  echo " please set a valid input image - you set $infname "
-  echo $usage 
-  exit 1
-fi 
 
-OUT=` echo $infname | cut -d '.' -f 1 `
-if [[ -s $infname ]] & [[ ${#infname} -gt 3 ]]  ; then 
 
-mc_ants_rigid ${infname} ${OUT}
-mc_ants_nonrigid ${infname} ${OUT}
 
-else 
-echo $usage
-fi 
