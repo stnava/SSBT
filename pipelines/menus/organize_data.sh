@@ -116,30 +116,15 @@ if [ ${choice} == "y" ]
     cp ${cfgtmp}/antsr_cfg.sh ${exp_path}/scripts/dependencies.sh
     chmod +x ${exp_path}/scripts/dependencies.sh 
     source ${exp_path}/scripts/dependencies.sh
+    source ants_functionlib
     for ((i = 1; i <= ${ses} ; i++))
     do
-      if [ ${i} -lt 10 ]
-      then
 	for ((j = 1; j <= ${runs} ; j++))
 	do
-	if [ ${j} -lt 10 ]
-	then
-	mkdir -p ${exp_path}/data/session_0${i}/run_0${j}
-	else
-	mkdir -p ${exp_path}/data/session_0${i}/run_${j}
-	fi
+	determine_session_run # required call to determine the current session and run
+	mkdir -p ${exp_path}/data/${session}/${run}
+	mkdir -p ${exp_path}/onsets/data/${session}/${run}
 	done
-      else 
-	for ((j = 1; j <= ${runs} ; j++))
-	do
-	if [ ${j} -lt 10 ]
-	then
-	mkdir -p ${exp_path}/data/session_${i}/run_0${j}
-	else
-	mkdir -p ${exp_path}/data/session_${i}/run_${j}
-	fi
-	done
-      fi
     done
 
     rm -rf ${cfgtmp}/

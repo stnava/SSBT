@@ -44,8 +44,8 @@ else
 # echo $3
 # echo $time_end
 # echo $time_elapsed
- echo $sum_time_elapsed
- echo $mean_time_elapsed
+ #echo $sum_time_elapsed
+ #echo $mean_time_elapsed
 # echo $remaining_time
 
  echo "-------------------------------------------------------------------------------"

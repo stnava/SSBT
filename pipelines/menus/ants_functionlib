@@ -114,4 +114,21 @@ ImageMath 3 $BM MD $BM  1
 
 }
 
+determine_session_run () {
 
+if [ ${i} -lt 10 ] # dealing with leading zero in session dirname 
+  then
+  session="session_0${i}"
+  else 
+  session="session_${i}"
+fi
+
+if [ ${j} -lt 10 ] # dealing with leading zero in session dirname 
+  then
+  run="run_0${j}"
+  else 
+  run="run_${j}"
+fi
+
+
+}
