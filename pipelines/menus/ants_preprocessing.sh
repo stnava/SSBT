@@ -144,13 +144,16 @@ run_preprocessing () { # main control structure for looping through data and run
     do
       if [ ${i} -lt 10 ] # dealing with leading zero in session dirname 
       then
+	
 	for ((j = 1; j <= ${runs} ; j++)) # looping through runs
 	do
+	
 	if [ ${j} -lt 10 ] # dealing with leading zero in run dirname
 	then
 	subarray=(`find ${exp_path}/data/session_0${i}/run_0${j}/* -prune -type f | tr " " "\n"`) # a real bash array with subject names
 
 	# create average images of time series; needed for SSBT if no other processing options are used
+	# Question: create these files regardless of preprocessing choices?
 	if [ ! -d ${exp_path}/data/session_0${i}/run_0${j}/avg ]; then mkdir ${exp_path}/data/session_0${i}/run_0${j}/avg; fi
 
 	for ((k = 0; k <= ${#subarray[@]}-1 ; k++))
@@ -160,14 +163,17 @@ run_preprocessing () { # main control structure for looping through data and run
 
 	if [ ! -f ${OUT}_avg.nii.gz ]
 	then
-	ants_moco -d 3 -a ${subarray[k]} -o ${OUT}_avg.nii.gz 
+	time_start=`date +%s`
+	Procedure="Creating time-series average session_0${i} run_0${j} subject: ${outfname}"
+	ants_moco -d 3 -a ${subarray[k]} -o ${OUT}_avg.nii.gz >> ${exp_path}/logs/std.out
 	echo "${exp_path}/data/session_0${i}/run_0${j}/avg/${outfname}_avg.nii.gz" >> ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects.txt
+	showBar ${k} ${#subarray[@]} ${time_start} ${Procedure} # show progress bar
 	fi
 	done
 
 	  if [ ${mc} -eq 1 ] # run motion correction if mc=1
 	  then
-	      
+
 	      if [ -f ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects.txt ]
 	      then
 	      rm ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects.txt # will be replaced by motion corrected fnames
@@ -176,15 +182,27 @@ run_preprocessing () { # main control structure for looping through data and run
 	      mkdir -p ${resultshome}/preprocessing/motion_correction/data/session_0${i}/run_0${j}/
 	      for ((k = 0; k <= ${#subarray[@]}-1 ; k++))
 	      do
+	
 		outfname=$(basename $(echo ${subarray[k]} | cut -d '.' -f 1 )) # nested command execution; neat!
 		OUT="${resultshome}/preprocessing/motion_correction/data/session_0${i}/run_0${j}/${outfname}"
 		infname=${subarray[k]}
+
 		Procedure="Motion correction session_0${i} run_0${j} subject: ${outfname}"
-		showBar ${k} ${#subarray[@]} ${Procedure} # show progress bar
-#		mc_ants_rigid ${infname} ${OUT} # run motion correction
-		rm ${resultshome}/preprocessing/motion_correction/data/session_0${i}/run_0${j}/${outfname}*.txt # remove progress file
+		
+		if [ ${k} -eq 0 ] # test needed to show progress bar for 1st subject
+		then
+		time_start=0
+		fi
+
+		showBar ${k} ${#subarray[@]}  ${time_start}
+
+	        time_start=`date +%s`
+		mc_ants_rigid ${infname} ${OUT} >> ${exp_path}/logs/std.out # run motion correction
+
 		echo "${resultshome}/preprocessing/motion_correction/data/session_0${i}/run_0${j}/${outfname}_avg.nii.gz" >> ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects_mc.txt
-		sleep 0.5 # debugging only
+		
+		oldtimestart=${time_start}
+		  
 	      done
 
 	      # change variable in dependencies.sh to indicate that motion correction was completed
@@ -207,6 +225,7 @@ run_preprocessing () { # main control structure for looping through data and run
 
 	      for ((k = 0; k <= ${#subarray[@]}-1 ; k++))
 	      do
+		time_start=`date +%s`
 		outfname=$(basename $(echo ${subarray[k]} | cut -d '.' -f 1 )) # nested command execution; neat!
 		if [ ${mc} -eq 1 ] && [ ${mc_pass} -eq 1 ] # use motion corrected results if motion correction was run
 		then 
@@ -216,6 +235,7 @@ run_preprocessing () { # main control structure for looping through data and run
 		  ants_bxt ${infname} ${OUT}
 
 		  echo "${resultshome}/preprocessing/brain_extraction/data/session_0${i}/run_0${j}/${outfname}_avg.nii.gz" >> ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects_bxt.txt
+		  showBar ${k} ${#subarray[@]} ${time_start} ${Procedure} # show progress bar
 
 		else # use original data 
 		
@@ -225,6 +245,7 @@ run_preprocessing () { # main control structure for looping through data and run
 		  ants_bxt ${infname} ${OUT}
 
 		  echo "${resultshome}/preprocessing/brain_extraction/data/session_0${i}/run_0${j}/${outfname}_avg.nii.gz" >> ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/subjects_bxt.txt
+		  showBar ${k} ${#subarray[@]} ${time_start} ${Procedure} # show progress bar
 
 		fi	      
 	      
@@ -243,9 +264,12 @@ run_preprocessing () { # main control structure for looping through data and run
 
 	else # condition where leading zero in run dirname is removed (more than 10 runs!)
 	echo "mkdir -p ${exp_path}/data/session_0${i}/run_${j}"
+
+	# would need repeat of the above code; needs fix 
+
 	fi
 	done
-      else 
+      else # dealing with leading 0 in session number; would need repeat of the above code; needs fix 
 	for ((j = 1; j <= ${runs} ; j++))
 	do
 	if [ ${j} -lt 10 ]
@@ -266,7 +290,7 @@ echo "missing subjects list"
 else
 echo "run btp"
 exe="buildtemplateparallel.sh -d 3 -o ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/mean `cat ${btplist}` "
-echo $exe
+$exe
 exit
 fi
 

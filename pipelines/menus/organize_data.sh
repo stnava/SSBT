@@ -112,6 +112,7 @@ if [ ${choice} == "y" ]
     then
     mkdir -p ${resultshome}
     mkdir -p ${exp_path}/scripts
+    mkdir -p ${exp_path}/logs
     cp ${cfgtmp}/antsr_cfg.sh ${exp_path}/scripts/dependencies.sh
     chmod +x ${exp_path}/scripts/dependencies.sh 
     source ${exp_path}/scripts/dependencies.sh
@@ -619,7 +620,7 @@ read choice
 case $choice in
 1) wiz_01 ;;
 2) test_data ;;
-3) main_menu ;;
+3) if [ $# -lt 1 ] ; then main_menu_nodep; elif [ -f ${cfg_file} ] && [[ ${cfg_file} =~ "dependencies" ]]; then main_menu; fi  ;;
 4) bye ;;
 *) echo "\"$choice\" is not valid "; sleep 2 ;;
 esac
