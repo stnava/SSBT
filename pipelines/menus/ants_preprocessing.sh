@@ -505,7 +505,7 @@ then
 echo "missing subjects list"
 else
 echo "run btp"
-echo "exe=buildtemplateparallel.sh -d 3 -o ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/mean ${btp_params} `cat ${btplist}` "
+exe=buildtemplateparallel.sh -d 3 -o ${resultshome}/preprocessing/SSBT_corrected/SSBT_creation/mean ${btp_params} `cat ${btplist}`
 $exe
 sed s/"btp_pass=0"/"btp_pass=1"/g ${exp_path}/scripts/dependencies.sh > ${exp_path}/scripts/dependencies_tmp.sh; 
 mv ${exp_path}/scripts/dependencies_tmp.sh ${exp_path}/scripts/dependencies.sh; 
